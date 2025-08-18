@@ -1,0 +1,19 @@
+{
+  "python.defaultInterpreterPath": ".\\.venv\\Scripts\\python.exe",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "& {",
+        "  . './.venv/Scripts/Activate.ps1';",
+        "  $env:PYTHONPATH = (Get-Location).Path",
+        "}"
+      ]
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "python.terminal.activateEnvironment": true
+} 

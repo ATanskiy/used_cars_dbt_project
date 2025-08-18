@@ -1,0 +1,11 @@
+notebooks/
+raw_data/
+docs/
+__pycache__/
+.venv/
+.kaggle/
+
+.env
+*.csv
+*.parquet
+*.ipynb_checkpoints
