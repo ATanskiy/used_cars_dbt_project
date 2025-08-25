@@ -54,3 +54,10 @@ HELPING_TIME_COLUMN = "parsed_date"
 
 # Encoding for reading parquet files
 ENCODING = "utf-8-sig"
+
+# Color column names
+COLOR = "color"
+HEX_COLOR = "hex_color"
+R = "R"
+G = "G"
+B = "B"

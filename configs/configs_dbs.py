@@ -37,15 +37,39 @@ DAILY_LOG_TABLE_COLUMNS = {
 UPDATED_STATUS = "processed_successfully"
 
 # Configs for staging area for daily loads
-STAGING_TABLE_ADS = "staging_daily_vehicle_ads"
+STAGING_TABLE_ADS = "staging_daily_ads"
 STAGING_TABLE_ADS_COLUMNS = {
-    "id": "TEXT PRIMARY KEY",
-    "make": "TEXT"
+    "row_id": "SERIAL PRIMARY KEY",
+    "cost": "TEXT",
+    "currency": "TEXT",
+    "marka": "TEXT",
+    "model": "TEXT",
+    "year": "TEXT",
+    "has_license": "TEXT",
+    "place": "TEXT",
+    "date": "TIMESTAMP",
+    "id": "TEXT",
+    "engine": "TEXT",
+    "power": "TEXT",
+    "gear": "TEXT",
+    "probeg": "TEXT",
+    "swheel": "TEXT",
+    "complectation": "TEXT",
+    "transmission": "TEXT",
+    "r": "TEXT",
+    "g": "TEXT",
+    "b": "TEXT",
+    "hex_color": "TEXT",
+    "color": "TEXT",
+    "inserted_at": "TIMESTAMP",
+    "updated_at": "TIMESTAMP"
 }
 
 STAGING_TABLE_DESCRIPTIONS = "staging_daily_descriptions"
 STAGING_TABLE_DESCRIPTIONS_COLUMNS = {
-    "row_id": "TEXT PRIMARY KEY",
+    "row_id": "SERIAL PRIMARY KEY",
     "id": "TEXT",
-    "description": "TEXT"
+    "description": "TEXT",
+    "inserted_at": "TIMESTAMP",
+    "updated_at": "TIMESTAMP"
 }   

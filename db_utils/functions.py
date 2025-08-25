@@ -2,6 +2,10 @@ from db_utils.postgres_conn import get_engine
 from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
 from configs.configs_dbs import DB_CONFIG
+from configs.configs import DAILY_ADS, DAILY_DESCRIPTIONS
+from functions.bucket_funcs import read_partitioned_file_from_s3
+from datetime import datetime
+import pandas as pd
 
 def table_exists(table_name: str, schema: str = None) -> bool:
     engine = get_engine()
@@ -15,9 +19,8 @@ def create_schema_if_not_exists(schema_name: str):
         conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema_name}"))
     print(f"✅ Schema {schema_name} is ready")
 
-def create_table_if_not_exists(table_name: str, columns: dict, schema: str = None):
+def create_table_if_not_exists(table_name: str, columns: dict, schema_name: str = None):
     engine = get_engine()
-    schema_name = schema or DB_CONFIG["schema"]
 
     inspector = inspect(engine)
     if inspector.has_table(table_name, schema=schema_name):
@@ -79,3 +82,41 @@ def update_row_status(table_name: str, row_id: str, new_status: str, schema: str
     except SQLAlchemyError as e:
         print(f"❌ Error updating row {row_id} in {schema}.{table_name}: {e}")
         raise
+
+def upload_file_to_stage(bucket: str, data_schema: dict, file_name: str,
+                      schema_name: str, date: str, table_name: str):
+    create_schema_if_not_exists(schema_name=schema_name)
+    create_table_if_not_exists(table_name=table_name,
+                               schema_name=schema_name, 
+                               columns=data_schema)
+
+    if file_name == DAILY_ADS:
+        df = read_partitioned_file_from_s3(bucket=bucket, date=date, filename=file_name)
+    else:
+        df = read_partitioned_file_from_s3(bucket=bucket, date=date, filename=file_name)
+    # Drop partition columns injected by Arrow
+    df = df.drop(columns=["year", "month", "day"], errors="ignore")
+    df.columns = [c.lower() for c in df.columns]
+    df.index = range(1, len(df) + 1)
+    now = pd.Timestamp.utcnow()
+    df["inserted_at"] = now
+    df["updated_at"] = now
+    engine = get_engine()
+
+    # Clean table before inserting
+    with engine.begin() as conn:
+        conn.execute(text(f"TRUNCATE TABLE {schema_name}.{table_name};"))
+
+    # Insert fresh data
+    df.to_sql(
+        name=table_name,
+        con=engine,
+        schema=schema_name,
+        if_exists="append",   # append into empty table
+        index=True,
+        index_label="row_id",
+        method="multi",
+        chunksize=5000
+    )
+
+    print(f"♻️ Refreshed {schema_name}.{table_name} with {len(df):,} rows")
