@@ -17,9 +17,9 @@ Functions included:
 """
 
 import os
+import pandas as pd
 from botocore.exceptions import ClientError
-from configs.config import RAW_FILE_NAME_TARGET, RAW_DATA_FOLDER,\
-                    S3, RAW_FILES_CARS
+from configs.configs import S3, RAW_FILES_CARS, STORAGE_OPT
 
 def bucket_exists(bucket):
     try:
@@ -34,6 +34,12 @@ def file_exists_in_bucket(bucket, key):
         return True
     except ClientError:
         return False
+    
+def files_exist_in_bucket(bucket, file_names):
+    for file_name in file_names:
+        if not file_exists_in_bucket(bucket, file_name):
+            return False
+    return True
 
 def upload_file_to_s3(local_path, bucket, key):
     print(f"Uploading {local_path} to {bucket}/{key}...")
@@ -49,11 +55,41 @@ def ensure_bucket_exists(bucket):
     else:
         print(f"Bucket '{bucket}' already exists.")
 
-def local_target_file_exists(folder, file_name):
+def local_file_exists(folder, file_name):
     cars_path = os.path.join(folder, file_name)
     return os.path.exists(cars_path)
 
-def upload_local_files(folder, file_name):
+def local_files_exist(folder, file_names):
+    for file_name in file_names:
+        if not local_file_exists(folder, file_name):
+            return False
+    return True
+
+def upload_local_file(folder, file_name):
     print("Found the file in 'raw_data'. Uploading to S3...")
     cars_path = os.path.join(folder, file_name)
-    upload_file_to_s3(cars_path, RAW_FILES_CARS, RAW_FILE_NAME_TARGET)
+    upload_file_to_s3(cars_path, RAW_FILES_CARS, file_name)
+
+def upload_local_files(folder, file_names):
+    for file_name in file_names:
+        upload_local_file(folder, file_name)
+    print("All local files uploaded successfully.")
+
+def read_parquet_from_s3(bucket: str, key: str):
+    return pd.read_parquet(f"s3://{bucket}/{key}", storage_options=STORAGE_OPT)
+
+def make_s3_path(base_bucket: str, relevant_date):
+    year = relevant_date.year
+    month = f"{relevant_date.month:02d}"
+    day = f"{relevant_date.day:02d}"
+    return f"{base_bucket}/year={year}/month={month}/day={day}/"
+
+def save_df_to_s3(df, bucket: str, date, filename: str):
+    path = make_s3_path(bucket, date) + filename
+    df.to_parquet(
+        f"s3://{path}",
+        engine="pyarrow",
+        index=False,
+        storage_options=STORAGE_OPT
+    )
+    print(f"✅ Saved {filename} → {path}")
