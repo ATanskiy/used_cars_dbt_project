@@ -2,6 +2,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+# Detect if running inside Docker
+IN_DOCKER = os.path.exists("/.dockerenv")
+
 # Load PostgreSQL credentials from .env file
 HOST = os.getenv("HOST")
 PORT = os.getenv("PORT")
@@ -10,6 +13,11 @@ PASSWORD = os.getenv("PASSWORD")
 DATABASE = os.getenv("DATABASE")
 SCHEMA_DEV = os.getenv("SCHEMA_DEV")
 SCHEMA_STAGING = os.getenv("SCHEMA_STAGING")
+
+# Override host/port when running inside Docker
+if IN_DOCKER:
+    HOST = "postgres"
+    PORT = "5432"
 
 # Connection settings (can also load from .env)
 DB_CONFIG = {
