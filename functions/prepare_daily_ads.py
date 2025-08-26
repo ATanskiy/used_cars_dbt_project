@@ -22,7 +22,7 @@ def prepare_daily_ads(df):
         create_schema_if_not_exists(SCHEMA_DEV)
         create_table_if_not_exists(table_name=DAILY_LOG_TABLE_NAME,
                                 columns=DAILY_LOG_TABLE_COLUMNS,
-                                schema=SCHEMA_DEV)
+                                schema_name=SCHEMA_DEV)
         processing_day = df_min_date
         print(f"Proessing first date: {df_min_date}")
         

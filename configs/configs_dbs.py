@@ -2,6 +2,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+# Detect if running inside Docker
+IN_DOCKER = os.path.exists("/.dockerenv")
+
 # Load PostgreSQL credentials from .env file
 HOST = os.getenv("HOST")
 PORT = os.getenv("PORT")
@@ -10,6 +13,11 @@ PASSWORD = os.getenv("PASSWORD")
 DATABASE = os.getenv("DATABASE")
 SCHEMA_DEV = os.getenv("SCHEMA_DEV")
 SCHEMA_STAGING = os.getenv("SCHEMA_STAGING")
+
+# Override host/port when running inside Docker
+if IN_DOCKER:
+    HOST = "postgres"
+    PORT = "5432"
 
 # Connection settings (can also load from .env)
 DB_CONFIG = {
@@ -37,15 +45,39 @@ DAILY_LOG_TABLE_COLUMNS = {
 UPDATED_STATUS = "processed_successfully"
 
 # Configs for staging area for daily loads
-STAGING_TABLE_ADS = "staging_daily_vehicle_ads"
+STAGING_TABLE_ADS = "staging_daily_ads"
 STAGING_TABLE_ADS_COLUMNS = {
-    "id": "TEXT PRIMARY KEY",
-    "make": "TEXT"
+    "row_id": "SERIAL PRIMARY KEY",
+    "cost": "TEXT",
+    "currency": "TEXT",
+    "marka": "TEXT",
+    "model": "TEXT",
+    "year": "TEXT",
+    "has_license": "TEXT",
+    "place": "TEXT",
+    "date": "TIMESTAMP",
+    "id": "TEXT",
+    "engine": "TEXT",
+    "power": "TEXT",
+    "gear": "TEXT",
+    "probeg": "TEXT",
+    "swheel": "TEXT",
+    "complectation": "TEXT",
+    "transmission": "TEXT",
+    "r": "TEXT",
+    "g": "TEXT",
+    "b": "TEXT",
+    "hex_color": "TEXT",
+    "color": "TEXT",
+    "inserted_at": "TIMESTAMP",
+    "updated_at": "TIMESTAMP"
 }
 
 STAGING_TABLE_DESCRIPTIONS = "staging_daily_descriptions"
 STAGING_TABLE_DESCRIPTIONS_COLUMNS = {
-    "row_id": "TEXT PRIMARY KEY",
+    "row_id": "SERIAL PRIMARY KEY",
     "id": "TEXT",
-    "description": "TEXT"
+    "description": "TEXT",
+    "inserted_at": "TIMESTAMP",
+    "updated_at": "TIMESTAMP"
 }   

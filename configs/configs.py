@@ -1,10 +1,12 @@
 import os
 import boto3
 from pathlib import Path
-from google.cloud import bigquery
 from botocore.config import Config
 from dotenv import load_dotenv
 load_dotenv()
+
+# Detect if running inside Docker
+IN_DOCKER = os.path.exists("/.dockerenv")
 
 # Kaggle dataset
 DATASET = "serge1024/russian-car-market-feb-march-2023"
@@ -26,6 +28,10 @@ ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
 SECRET_KEY = os.getenv("MINIO_SECRET_KEY")
 RAW_FILES_CARS = os.getenv("RAW_FILES_CARS")
 RAW_DAILY_VEHICLE_ADS=os.getenv("RAW_DAILY_VEHICLE_ADS")
+
+# Override host/port when running inside Docker
+if IN_DOCKER:
+    MINIO_ENDPOINT = "http://minio:9000"
 
 # Initialize S3 client
 S3 = boto3.client(
@@ -54,3 +60,10 @@ HELPING_TIME_COLUMN = "parsed_date"
 
 # Encoding for reading parquet files
 ENCODING = "utf-8-sig"
+
+# Color column names
+COLOR = "color"
+HEX_COLOR = "hex_color"
+R = "R"
+G = "G"
+B = "B"

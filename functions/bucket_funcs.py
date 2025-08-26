@@ -20,7 +20,6 @@ import os
 import pandas as pd
 from botocore.exceptions import ClientError
 from configs.configs import S3, RAW_FILES_CARS, STORAGE_OPT
-
 def bucket_exists(bucket):
     try:
         S3.head_bucket(Bucket=bucket)
@@ -78,13 +77,14 @@ def upload_local_files(folder, file_names):
 def read_parquet_from_s3(bucket: str, key: str):
     return pd.read_parquet(f"s3://{bucket}/{key}", storage_options=STORAGE_OPT)
 
-def make_s3_path(base_bucket: str, relevant_date):
-    year = relevant_date.year
-    month = f"{relevant_date.month:02d}"
-    day = f"{relevant_date.day:02d}"
+def make_s3_path(base_bucket: str, date):
+    year = date.year
+    month = f"{date.month:02d}"
+    day = f"{date.day:02d}"
     return f"{base_bucket}/year={year}/month={month}/day={day}/"
 
 def save_df_to_s3(df, bucket: str, date, filename: str):
+    df = df.drop(columns=["year", "month", "day"], errors="ignore")
     path = make_s3_path(bucket, date) + filename
     df.to_parquet(
         f"s3://{path}",
@@ -93,3 +93,13 @@ def save_df_to_s3(df, bucket: str, date, filename: str):
         storage_options=STORAGE_OPT
     )
     print(f"✅ Saved {filename} → {path}")
+
+def read_partitioned_file_from_s3(bucket: str, date, filename: str):
+    path = make_s3_path(bucket, date) + filename
+    df = pd.read_parquet(
+        f"s3://{path}",
+        engine="pyarrow",
+        storage_options=STORAGE_OPT
+    )
+    print(f"📥 Loaded {filename} ← {path} ({len(df):,} rows)")
+    return df
