@@ -14,6 +14,7 @@
       ]
     }
   },
-  "terminal.integrated.defaultProfile.windows": "PowerShell",
-  "python.terminal.activateEnvironment": true
+  "dbtPowerUser.projectValidation": false,
+  "dbt.perspectiveTheme": "Vintage",
+  "dbt.enableNewLineagePanel": true
 } 

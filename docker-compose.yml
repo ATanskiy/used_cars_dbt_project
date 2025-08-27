@@ -14,37 +14,37 @@ services:
     volumes:
       - minio_used_vehicles:/data
 
-  # # Jupyter Notebook for data analysis
-  # jupyter:
-  #   image: jupyter/datascience-notebook:latest
-  #   container_name: jupyter_used_vehicles
-  #   user: "1000:100"
-  #   ports:
-  #     - "8889:8888"
-  #   environment:
-  #     MINIO_ENDPOINT: http://minio:9000
-  #     MINIO_ACCESS_KEY: minioadmin
-  #     MINIO_SECRET_KEY: minioadmin
-  #   volumes:
-  #     - "C:/projects_github/used_cars_dbt_project/notebooks:/home/jovyan/work:rw"
-  #   working_dir: /home/jovyan/work
-  #   command: 
-  #     - /bin/bash
-  #     - -c
-  #     - |
-  #       pip install --no-cache-dir \
-  #         s3fs==2024.3.1 \
-  #         aiobotocore==2.12.3 \
-  #         boto3==1.34.69 \
-  #         botocore==1.34.69 \
-  #         pyarrow \
-  #         fastparquet \
-  #       && start-notebook.py \
-  #         --ServerApp.root_dir=/home/jovyan/work \
-  #         --IdentityProvider.token='' \
-  #         --ServerApp.password=''   
-  #   depends_on:
-  #     - minio
+  # Jupyter Notebook for data analysis
+  jupyter:
+    image: jupyter/datascience-notebook:latest
+    container_name: jupyter_used_vehicles
+    user: "1000:100"
+    ports:
+      - "8889:8888"
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    volumes:
+      - "C:/projects_github/used_cars_dbt_project/notebooks:/home/jovyan/work:rw"
+    working_dir: /home/jovyan/work
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        pip install --no-cache-dir \
+          s3fs==2024.3.1 \
+          aiobotocore==2.12.3 \
+          boto3==1.34.69 \
+          botocore==1.34.69 \
+          pyarrow \
+          fastparquet \
+        && start-notebook.py \
+          --ServerApp.root_dir=/home/jovyan/work \
+          --IdentityProvider.token='' \
+          --ServerApp.password=''   
+    depends_on:
+      - minio 
 
   # Main business DB
   postgres:
@@ -76,6 +76,44 @@ services:
       - postgres
       - minio
 
+  # dbt container
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres:1.9.0
+    container_name: dbt_used_vehicles
+    working_dir: /app/dbt
+    volumes:
+      - ./dbt:/app/dbt                       # mount your dbt project
+      - ./profiles.yml:/root/.dbt/profiles.yml  # mount dbt profiles
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    tty: true
+    stdin_open: true
+
+  # Dagster: Webserver (Dagit UI)
+  dagster:
+    build:
+      context: .                  # root of your project
+      dockerfile: Dockerfile.dagster
+    container_name: dagster_used_vehicles
+    working_dir: /opt/dagster/app
+    ports:
+      - "3000:3000"
+    environment:
+      DAGSTER_HOME: /opt/dagster/app/.dagster_home
+      PYTHONPATH: /opt/dagster/app
+    volumes:
+      - .:/opt/dagster/app        # mount whole project
+      - dagster_used_vehicles:/opt/dagster/app/.dagster_home
+      - ./dbt:/opt/dagster/app/dbt
+      - ./profiles.yml:/root/.dbt/profiles.yml
+    depends_on:
+      - postgres
+      - minio
+      - dbt
+      
 volumes:
   minio_used_vehicles:
   postgres_used_vehicles:
+  dagster_used_vehicles:
