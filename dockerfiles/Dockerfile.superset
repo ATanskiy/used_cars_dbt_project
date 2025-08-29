@@ -1,0 +1,10 @@
+FROM apache/superset:latest
+
+USER root
+
+# Ensure pip inside Superset venv and install psycopg2 + flask-cors
+RUN /app/.venv/bin/python -m ensurepip --upgrade \
+ && /app/.venv/bin/python -m pip install --no-cache-dir --upgrade pip setuptools wheel \
+ && /app/.venv/bin/python -m pip install --no-cache-dir psycopg2-binary==2.9.10 flask-cors
+
+USER superset

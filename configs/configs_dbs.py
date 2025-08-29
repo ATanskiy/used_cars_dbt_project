@@ -28,6 +28,15 @@ DB_CONFIG = {
     "database": DATABASE
 }
 
+# Superset DB parameters
+DB_SUPERUSER = {
+    "user": "admin",
+    "password": "admin",
+    "host": "localhost",
+    "port": 5434,
+    "database": "used_vehicles_ads"  # connect to default db
+}
+
 # Configs for daily_vehicle_ads table
 DAILY_LOG_TABLE_NAME = "daily_vehicle_load_log"
 DAILY_LOG_TABLE_COLUMNS = {

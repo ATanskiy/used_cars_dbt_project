@@ -11,7 +11,7 @@ with base as (
 ),
 
 new_records as (
-    select  engine as engine_original,
+    select  engine as engine_type_original,
         case lower(engine)
             when 'gasoline' then 'Petrol/Gasoline'
             when 'diesel'   then 'Diesel'
@@ -25,7 +25,7 @@ new_records as (
     {% if is_incremental() %}
       -- only rows not yet in the target table
       except
-      select engine_original,
+      select engine_type_original,
              engine_type_normalized
       from {{ this }}
     {% endif %}
@@ -39,7 +39,7 @@ select
         cast(row_number() over (order by engine_type_normalized) as int) as id
     {% endif %},
 
-    engine_original,
+    engine_type_original,
     engine_type_normalized,
     now() as inserted_at,
     null as updated_at

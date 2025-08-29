@@ -11,7 +11,7 @@ with base as (
 ),
 
 new_records as (
-    select transmission as transmission_original,
+    select transmission as transmission_type_original,
         case lower(transmission)
             when 'mechanical' then 'Manual (MT)'
             when 'automatic'  then 'Automatic (AT)'
@@ -24,7 +24,7 @@ new_records as (
     {% if is_incremental() %}
       -- only rows not yet in the target table
       except
-      select transmission_original,
+      select transmission_type_original,
              transmission_type_normalized
       from {{ this }}
     {% endif %}
@@ -38,7 +38,7 @@ select
         cast(row_number() over (order by transmission_type_normalized) as int) as id
     {% endif %},
 
-    transmission_original,
+    transmission_type_original,
     transmission_type_normalized,
     now() as inserted_at,
     null as updated_at

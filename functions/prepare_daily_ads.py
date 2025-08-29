@@ -4,7 +4,7 @@ from datetime import datetime
 from configs.configs_dbs import SCHEMA_DEV, DAILY_LOG_TABLE_NAME, DAILY_LOG_TABLE_COLUMNS
 from configs.configs import SORT_COLUMN, HELPING_TIME_COLUMN
 from functions.transform_ads import replace_empty_with_na,\
-                                             convert_to_datetime
+                                             convert_to_datetime, filter_by_start_date
 from db_utils.functions import table_exists, create_table_if_not_exists,\
                  create_schema_if_not_exists, get_max_date, insert_row
 from functions.create_colors_ads import add_color_columns
@@ -14,7 +14,7 @@ def prepare_daily_ads(df):
     df = replace_empty_with_na(df)
     df = convert_to_datetime(df, SORT_COLUMN, HELPING_TIME_COLUMN)\
                 .sort_values(HELPING_TIME_COLUMN, ascending=True)
-
+    df = filter_by_start_date(df, HELPING_TIME_COLUMN)
     df_min_date = df[HELPING_TIME_COLUMN].dropna().min()
     run_id = str(uuid.uuid4())
 

@@ -67,5 +67,7 @@ select
         cast(row_number() over (order by marka, model) as int) as id
     {% endif %},
 
-    *
+    *,
+    now() as inserted_at,
+    null as updated_at
 from new_records

@@ -1,0 +1,3 @@
+databases:
+  - database_name: Used_Vehicles
+    sqlalchemy_uri: postgresql+psycopg2://admin:admin@postgres:5432/used_vehicles_ads

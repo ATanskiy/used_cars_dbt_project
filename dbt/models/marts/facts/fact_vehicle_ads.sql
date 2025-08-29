@@ -73,7 +73,7 @@ joined as (
 
     -- engine
     left join {{ ref('dim_engines') }} e
-      on lower(b.engine) = lower(e.engine_original)
+      on lower(b.engine) = lower(e.engine_type_original)
 
     -- drive type
     left join {{ ref('dim_drive_types') }} d
@@ -81,7 +81,7 @@ joined as (
 
     -- transmission
     left join {{ ref('dim_transmissions') }} t
-      on lower(b.transmission) = lower(t.transmission_original)
+      on lower(b.transmission) = lower(t.transmission_type_original)
 
     -- colors
     left join {{ ref('dim_vehicle_colors') }} c

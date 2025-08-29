@@ -4,7 +4,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from configs.configs_dbs import DB_CONFIG
 from configs.configs import DAILY_ADS, DAILY_DESCRIPTIONS
 from functions.bucket_funcs import read_partitioned_file_from_s3
-from datetime import datetime
 import pandas as pd
 
 def table_exists(table_name: str, schema: str = None) -> bool:

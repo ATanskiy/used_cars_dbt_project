@@ -7,7 +7,7 @@ materialize_all = define_asset_job(
 )
 
 # Schedule to run every 3 minutes
-every_three_minutes = ScheduleDefinition(
+every_two_minutes = ScheduleDefinition(
     job=materialize_all,
-    cron_schedule="*/3 * * * *"
+    cron_schedule="*/2 * * * *"
 )

@@ -39,10 +39,7 @@ def run_daily_load():
     
     update_row_status(table_name=DAILY_LOG_TABLE_NAME, row_id=run_id,
                        new_status=UPDATED_STATUS, schema=SCHEMA_DEV)
-    
-#     # ads_staging = read_df_from_s3(bucket=RAW_DAILY_VEHICLE_ADS, key=DAILY_ADS, date=date)
-#     # descriptions_staging = read_df_from_s3(bucket=RAW_DAILY_VEHICLE_ADS, key=DAILY_DESCRIPTIONS, date=date)
 
-# if __name__ == "__main__":
-#     run_daily_load()
-#     print("Bucket check and creation process completed successfully.")
+if __name__ == "__main__":
+    run_daily_load()
+    print("Bucket check and creation process completed successfully.")

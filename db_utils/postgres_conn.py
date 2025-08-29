@@ -17,13 +17,14 @@ def get_engine() -> Engine:
 @contextmanager
 def get_connection():
     """
-    Context manager for a DB connection, sets search_path to schema.
+    Context manager for a DB connection.
+    Optionally sets search_path if 'schema' is in DB_CONFIG.
     """
     engine = get_engine()
     conn = engine.connect()
     try:
-        # set schema for the session
-        conn.execute(text(f"SET search_path TO {DB_CONFIG['schema']}"))
+        if "schema" in DB_CONFIG and DB_CONFIG["schema"]:
+            conn.execute(text(f"SET search_path TO {DB_CONFIG['schema']}"))
         yield conn
     except SQLAlchemyError as e:
         print(f"❌ DB error: {e}")

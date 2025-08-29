@@ -2,11 +2,7 @@ from sqlalchemy import text
 from db_utils.postgres_conn import get_engine
 
 def drop_all_tables_in_schemas(schemas: list[str]):
-    """
-    Drop all tables in the given schemas.
-    """
     engine = get_engine()
-
     with engine.begin() as conn:
         for schema in schemas:
             print(f"🔍 Checking schema: {schema}")

@@ -14,13 +14,16 @@ RUN pip install --no-cache-dir \
     dagit \
     dagster-dbt \
     dbt-postgres \
-    boto3 \
     pandas \
     pyarrow \
     psycopg2-binary\
     webcolors\
-    s3fs
+    boto3==1.34.106 \
+    botocore==1.34.106 \
+    s3fs==2024.6.0 \
+    fsspec==2024.6.0 
 
+ENV BOTO_DISABLE_HTTP_CHECKSUM_VALIDATION=1
 
 # expose Dagit UI port
 EXPOSE 3000
