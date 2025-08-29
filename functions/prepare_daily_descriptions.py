@@ -21,5 +21,7 @@ from .prepare_daily_ads import replace_empty_with_na
 def prepare_daily_descriptions(descriptions, ads):
     descriptions = replace_empty_with_na(descriptions)
     daily_ids = set(ads["id"])
+    descriptions = descriptions[descriptions["id"].isin(daily_ids)]\
+                    .rename(columns={"text": "description"})
 
-    return descriptions[descriptions["id"].isin(daily_ids)]
+    return descriptions

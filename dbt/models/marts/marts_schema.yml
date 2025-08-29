@@ -1,0 +1,8 @@
+models:
+  - name: vehicle_colors
+    description: "Unique vehicle color combinations from staging_daily_ads"
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null

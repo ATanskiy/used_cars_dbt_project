@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: staging
+    schema: staging   # replace with your schema
+    tables:
+      - name: staging_daily_ads
+      - name: staging_daily_descriptions

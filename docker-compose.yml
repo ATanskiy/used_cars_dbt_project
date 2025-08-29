@@ -7,6 +7,8 @@ services:
     ports:
       - "9120:9000"  # S3 API
       - "9121:9001"  # Web UI
+    networks:
+      - used_vehicles_network
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -21,6 +23,8 @@ services:
   #   user: "1000:100"
   #   ports:
   #     - "8889:8888"
+  #   network:
+  #     - used_vehicles_network
   #   environment:
   #     MINIO_ENDPOINT: http://minio:9000
   #     MINIO_ACCESS_KEY: minioadmin
@@ -52,20 +56,26 @@ services:
     container_name: postgres_used_vehicles
     ports:
       - "5434:5432"
+    networks:
+      - used_vehicles_network
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: used_vehicles_ads
+      - POSTGRES_USER=${USER}
+      - POSTGRES_PASSWORD=${PASSWORD}
+      - POSTGRES_DB=${DATABASE}
     volumes:
       - postgres_used_vehicles:/var/lib/postgresql/data
 
   # Python container
   python-app:
-    build: .
+    build:
+      context: .                  # root of your project
+      dockerfile: dockerfiles/Dockerfile
     container_name: python_used_vehicles
     working_dir: /app
     environment:
       PYTHONPATH: /app
+    networks:
+      - used_vehicles_network
     volumes:
       - .:/app
     env_file:
@@ -76,6 +86,83 @@ services:
       - postgres
       - minio
 
+  # dbt container
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres:1.9.0
+    container_name: dbt_used_vehicles
+    working_dir: /app/dbt
+    networks:
+      - used_vehicles_network
+    volumes:
+      - ./dbt:/app/dbt                       # mount your dbt project
+      - ./profiles.yml:/root/.dbt/profiles.yml  # mount dbt profiles
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    tty: true
+    stdin_open: true
+
+  # Dagster: Webserver (Dagit UI)
+  dagster:
+    build:
+      context: .                  # root of your project
+      dockerfile: /dockerfiles/Dockerfile.dagster
+    container_name: dagster_used_vehicles
+    working_dir: /opt/dagster/app
+    ports:
+      - "3000:3000"
+    networks:
+      - used_vehicles_network
+    environment:
+      DAGSTER_HOME: /opt/dagster/app/.dagster_home
+      PYTHONPATH: /opt/dagster/app
+      AWS_EC2_METADATA_DISABLED: "true"
+      AWS_DEFAULT_REGION: "us-east-1"
+      BOTO_DISABLE_HTTP_CHECKSUM_VALIDATION: "1"
+    volumes:
+      - .:/opt/dagster/app        # mount whole project
+      - dagster_used_vehicles:/opt/dagster/app/.dagster_home
+      - ./dbt:/opt/dagster/app/dbt
+      - ./profiles.yml:/root/.dbt/profiles.yml
+    depends_on:
+      - postgres
+      - minio
+      - dbt
+
+  # Apache Superset container
+  superset:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.superset
+    container_name: superset_used_vehicles
+    ports:
+      - "8088:8088"
+    networks:
+      - used_vehicles_network
+    env_file:
+      - .env
+    volumes:
+      - superset_used_vehicles:/app/superset_home
+      - ./configs/superset_config.py:/app/pythonpath/superset_config.py
+      - ./configs/databases.yml:/app/databases.yml
+    depends_on:
+      - postgres
+    command: >
+      /bin/bash -c "
+      superset db upgrade &&
+      superset fab list-users | grep admin || superset fab create-admin --username admin --firstname admin --lastname admin --email admin@superset.com --password admin || true &&
+      superset import-datasources -p /app/databases.yml || true &&
+      superset init &&
+      superset run -h 0.0.0.0 -p 8088
+      "
+   
 volumes:
   minio_used_vehicles:
   postgres_used_vehicles:
+  dagster_used_vehicles:
+  superset_used_vehicles:
+
+networks:
+  used_vehicles_network:
+    driver: bridge

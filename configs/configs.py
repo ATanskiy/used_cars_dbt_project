@@ -47,7 +47,7 @@ STORAGE_OPT = {
     "key": ACCESS_KEY,
     "secret": SECRET_KEY,
     "client_kwargs": {
-        "endpoint_url": MINIO_ENDPOINT
+        "endpoint_url": MINIO_ENDPOINT,
     }
 }
 

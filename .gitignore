@@ -9,3 +9,4 @@ __pycache__/
 *.csv
 *.parquet
 *.ipynb_checkpoints
+profiles.yml

@@ -5,6 +5,11 @@ def replace_empty_with_na(df):
     # replace empty strings and common null representations with pd.NA
     return df.replace(["", " ", "  ", "nan", "NaN", "None"], pd.NA)
 
+def filter_by_start_date(df, column):
+    start = "2022-01-01"
+    start_date = pd.to_datetime(start).date()
+    return df[df[column] >= start_date]
+
 def convert_to_datetime(df, column, helping_column):
     # Pre-clean
     df[helping_column] = df[column].replace(["", " ", "nan", "NaN", "None"], pd.NA).astype(str)
@@ -34,7 +39,7 @@ def convert_to_datetime(df, column, helping_column):
 
     # 👉 Convert to date only
     df[helping_column] = df[helping_column].dt.date
-
+    df[column] = df[helping_column]
     # Debug: show only if failures exist
     failed = df.loc[df[helping_column].isna(), column].dropna().unique()
     if len(failed) > 0:
