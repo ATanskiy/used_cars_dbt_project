@@ -10,3 +10,7 @@ __pycache__/
 *.parquet
 *.ipynb_checkpoints
 profiles.yml
+
+target/
+dbt_packages/
+logs/
