@@ -1,0 +1,15 @@
+models:
+  - name: vehicle_ads_wide
+    description: Final user facing table for reporting
+    columns:
+      - name: id
+        description: Primary key for the listing
+        tests:
+          - unique
+          - not_null
+
+    tests:
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: ref('fact_vehicle_ads')
+
+      
